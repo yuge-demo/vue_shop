@@ -2,13 +2,16 @@
       <el-container class="home-container">
             <el-header>
                   <div>
-                        <img src="../assets/logo.png" alt />
+                        <router-link to="/welcome">
+                              <img src="../assets/logo.png" alt />
+                        </router-link>
                         <span>电商后台管理系统</span>
                   </div>
                   <el-button type="info" @click="exit">退出</el-button>
             </el-header>
             <el-container>
                   <!-- 侧边栏菜单区域 -->
+                  <!-- 一级菜单 -->
                   <el-aside :width="isCollapse ? '64px' : '200px'">
                         <div class="toggle-button" @click="toggleCollapse">|||</div>
                         <el-menu
@@ -18,6 +21,7 @@
                               unique-opened
                               :collapse="isCollapse"
                               :collapse-transition="false"
+                              :router="true"
                         >
                               <el-submenu
                                     :index="item.id + '' "
@@ -28,8 +32,9 @@
                                           <i :class="iconsObj[item.id]"></i>
                                           <span>{{item.authName}}</span>
                                     </template>
+                                    <!-- 二级菜单 -->
                                     <el-menu-item
-                                          :index="subItem.id+''"
+                                          :index="'/'+subItem.path"
                                           v-for="subItem in item.children"
                                           :key="subItem.id"
                                     >
@@ -41,7 +46,9 @@
                               </el-submenu>
                         </el-menu>
                   </el-aside>
-                  <el-main>Main</el-main>
+                  <el-main>
+                        <router-view></router-view>
+                  </el-main>
             </el-container>
       </el-container>
 </template>
