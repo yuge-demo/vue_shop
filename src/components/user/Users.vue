@@ -54,7 +54,12 @@
                                           size="mini"
                                           @click="showEditDialog(scope.row.id)"
                                     ></el-button>
-                                    <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+                                    <el-button
+                                          type="danger"
+                                          icon="el-icon-delete"
+                                          size="mini"
+                                          @click="removeUserById(scope.row.id)"
+                                    ></el-button>
                                     <el-tooltip
                                           effect="dark"
                                           content="分配角色"
@@ -357,6 +362,37 @@ export default {
                         this.getUserList();
                         this.$message.success("查询用户成功");
                   });
+            },
+            // 根据id删除对应的数据
+            async removeUserById(id) {
+                  //弹框询问用户是否删除
+                  await this.$confirm(
+                        "此操作将永久删除该用户, 是否继续?",
+                        "提示",
+                        {
+                              confirmButtonText: "确定",
+                              cancelButtonText: "取消",
+                              type: "warning"
+                        }
+                  )
+                        .then(() => {
+                              this.$message({
+                                    type: "success",
+                                    message: "删除成功!"
+                              });
+                        })
+                        .catch(() => {
+                              this.$message({
+                                    type: "info",
+                                    message: "已取消删除"
+                              });
+                        });
+                  const { data: res } = await this.axios.delete("users/" + id);
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("删除用户失败！");
+                  }
+                  this.$message.success("删除用户成功！");
+                  this.getUserList();
             }
       }
 };
