@@ -7,9 +7,9 @@
                   <el-breadcrumb-item>用户列表</el-breadcrumb-item>
             </el-breadcrumb>
             <!-- 卡片视图区域 -->
-            <el-card class="box-card">
+            <el-card>
                   <!-- 搜索与添加区域 -->
-                  <el-row :gutter="20">
+                  <el-row>
                         <el-col :span="8">
                               <el-input
                                     placeholder="请输入内容"
@@ -64,12 +64,13 @@
                                           effect="dark"
                                           content="分配角色"
                                           placement="top"
-                                          :enterable="false"
+                                          :enterable="true"
                                     >
                                           <el-button
                                                 type="warning"
                                                 icon="el-icon-setting"
                                                 size="mini"
+                                                @click="setRoles(scope.row)"
                                           ></el-button>
                                     </el-tooltip>
                               </template>
@@ -118,6 +119,7 @@
                         <el-button @click="addDialogVisible = false" type="info">取 消</el-button>
                   </span>
             </el-dialog>
+
             <!-- 修改用户的对话框 -->
             <el-dialog
                   title="修改用户信息"
@@ -146,6 +148,32 @@
                         <el-button type="info" @click="editDialogVisible = false">取 消</el-button>
                   </span>
             </el-dialog>
+
+            <!-- 分配角色对话框 -->
+            <el-dialog
+                  title="提示"
+                  :visible.sync="setRoledialogVisible"
+                  width="50%"
+                  @close="editRoleDialogClosed"
+            >
+                  <p>当前的用户: {{userInfo.username}}</p>
+                  <p>当前的角色: {{userInfo.role_name}}</p>
+                  <p>
+                        分配新角色:
+                        <el-select v-model="selectRoleId" placeholder="请选择">
+                              <el-option
+                                    v-for="item in rolesList"
+                                    :key="item.id"
+                                    :label="item.roleName"
+                                    :value="item.id"
+                              ></el-option>
+                        </el-select>
+                  </p>
+                  <span slot="footer" class="dialog-footer">
+                        <el-button @click="setRoledialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+                  </span>
+            </el-dialog>
       </div>
 </template>
 
@@ -159,6 +187,7 @@ export default {
                   if (regEmail.test(value)) {
                         //验证通过合法邮箱
                         return callback();
+                        pagesize;
                   }
                   callback(new Error("验证合法的邮箱"));
             };
@@ -268,7 +297,15 @@ export default {
                                     trigger: "blur"
                               }
                         ]
-                  }
+                  },
+                  //分配角色对话框
+                  setRoledialogVisible: false,
+                  //需要被分配角色的用户信息
+                  userInfo: {},
+                  //所有角色数据列表
+                  rolesList: [],
+                  //已选中的角色Id的值
+                  selectRoleId: ""
             };
       },
       created() {
@@ -372,7 +409,7 @@ export default {
                         {
                               confirmButtonText: "确定",
                               cancelButtonText: "取消",
-                              type: "warning" 
+                              type: "warning"
                         }
                   )
                         .then(() => {
@@ -393,6 +430,41 @@ export default {
                   }
                   this.$message.success("删除用户成功！");
                   this.getUserList();
+            },
+            //展示分配角色对话框
+            async setRoles(userInfo) {
+                  this.userInfo = userInfo;
+                  //在展示对话框获取所有角色列表
+                  const { data: res } = await this.axios.get("roles");
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("获取角色列表失败！");
+                  }
+                  this.$message.success("获取角色列表成功！");
+                  this.rolesList = res.data;
+                  this.setRoledialogVisible = true;
+            },
+            //点击按钮分配角色
+            async saveRoleInfo() {
+                  if (!this.selectRoleId) {
+                        return this.$message.error("请选择要分配的角色");
+                  }
+                  const { data: res } = await this.axios.put(
+                        `users/${this.userInfo.id}/role`,
+                        {
+                              rid: this.selectRoleId
+                        }
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("更新角色失败！");
+                  }
+                  this.$message.success("更新角色成功！");
+                  this.getUserList();
+                  this.setRoledialogVisible = false;
+            },
+            //监听分配角色对话框关闭事件
+            editRoleDialogClosed() {
+                  this.selectRoleId = "";
+                  this.userInfo = {};
             }
       }
 };

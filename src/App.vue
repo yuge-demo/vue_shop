@@ -10,7 +10,9 @@ export default {
 };
 </script>
 <style>
-.app{
+.app {
       height: 100%;
+      /* min-width: 1366px; */
 }
+
 </style>

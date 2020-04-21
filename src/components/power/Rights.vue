@@ -40,10 +40,9 @@ export default {
             async getRightsList() {
                   const { data: res } = await this.axios.get("rights/list");
                   if (res.meta.status !== 200) {
-                        this.$message.error("获取列表失败！");
+                        return this.$message.error("获取列表失败！");
                   }
                   this.rightsList = res.data;
-                  console.log(this.rightsList);
             }
       }
 };
