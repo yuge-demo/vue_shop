@@ -67,7 +67,12 @@
                         <el-table-column prop="roleDesc" label="角色描述"></el-table-column>
                         <el-table-column label="操作">
                               <template slot-scope="scope">
-                                    <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
+                                    <el-button
+                                          size="mini"
+                                          type="primary"
+                                          icon="el-icon-edit"
+                                          @click="editRoleById(scope.row.id)"
+                                    >编辑</el-button>
                                     <el-button
                                           size="mini"
                                           type="danger"
@@ -84,6 +89,21 @@
                         </el-table-column>
                   </el-table>
             </el-card>
+            <!-- 编辑角色对话框 -->
+            <el-dialog title="修改角色" width="50%" :visible.sync="editdialogVisible">
+                  <el-from :model="editFrom" label-width="70px">
+                        <el-form-item label="角色名称">
+                              <el-input v-model="editFrom.roleName"></el-input>
+                        </el-form-item>
+                        <el-form-item label="角色描述">
+                              <el-input v-model="editFrom.roleDesc"></el-input>
+                        </el-form-item>
+                  </el-from>
+                  <div slot="footer" class="dialog-footer">
+                        <el-button @click="editdialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="editdialogVisible = false">确 定</el-button>
+                  </div>
+            </el-dialog>
             <!-- 分配权限的对话框 -->
             <el-dialog
                   title="提示"
@@ -92,7 +112,7 @@
                   @close="SetRightDialogClosed"
             >
                   <!-- 树形空间 -->
-                   <el-tree
+                  <el-tree
                         :data="rightsList"
                         :props="treeProps"
                         show-checkbox
@@ -125,7 +145,11 @@ export default {
                         children: "children"
                   },
                   //默认选中节点id值
-                  defKeys: []
+                  defKeys: [],
+                  // 控制编制角色的显示与隐藏
+                  editdialogVisible: false,
+                  //用户信息对象
+                  editFrom: {}
             };
       },
       created() {
@@ -175,6 +199,10 @@ export default {
                   role.children = res.data;
                   //使用这种渲染页面会使页面从新的刷新会关闭表也权限的内容
                   // this.getRolesList();
+            },
+            //编辑角色
+            editRoleById(id) {
+                  this.editdialogVisible = true;
             },
             //删除角色
             async removeRoleById(id) {
