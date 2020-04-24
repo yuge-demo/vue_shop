@@ -8,7 +8,7 @@
             <el-card>
                   <el-row>
                         <el-col>
-                              <el-button type="primary">添加角色</el-button>
+                              <el-button type="primary" @click="addDialogVisible = true">添加角色</el-button>
                         </el-col>
                   </el-row>
                   <el-table :data="roleList" border stripe>
@@ -71,7 +71,7 @@
                                           size="mini"
                                           type="primary"
                                           icon="el-icon-edit"
-                                          @click="editRoleById(scope.row.id)"
+                                          @click="showEditDialog(scope.row.id)"
                                     >编辑</el-button>
                                     <el-button
                                           size="mini"
@@ -91,17 +91,17 @@
             </el-card>
             <!-- 编辑角色对话框 -->
             <el-dialog title="修改角色" width="50%" :visible.sync="editdialogVisible">
-                  <el-from :model="editFrom" label-width="70px">
+                  <el-form :model="editFrom" label-width="70px" ref="editFromRef">
                         <el-form-item label="角色名称">
                               <el-input v-model="editFrom.roleName"></el-input>
                         </el-form-item>
                         <el-form-item label="角色描述">
                               <el-input v-model="editFrom.roleDesc"></el-input>
                         </el-form-item>
-                  </el-from>
+                  </el-form>
                   <div slot="footer" class="dialog-footer">
                         <el-button @click="editdialogVisible = false">取 消</el-button>
-                        <el-button type="primary" @click="editdialogVisible = false">确 定</el-button>
+                        <el-button type="primary" @click="editUser">确 定</el-button>
                   </div>
             </el-dialog>
             <!-- 分配权限的对话框 -->
@@ -123,6 +123,21 @@
                   <span slot="footer" class="dialog-footer">
                         <el-button @click="SetRightDialogVisible = false">取 消</el-button>
                         <el-button type="primary" @click="SetRightDialogVisible = false">确 定</el-button>
+                  </span>
+            </el-dialog>
+            <!-- 添加用户 -->
+            <el-dialog title="提示" :visible.sync="addDialogVisible" width="50%">
+                  <el-form :model="addFrom" label-width="70px" ref="editFromRef">
+                        <el-form-item label="角色名称">
+                              <el-input v-model="addFrom.roleName"></el-input>
+                        </el-form-item>
+                        <el-form-item label="角色描述">
+                              <el-input v-model="addFrom.roleDesc"></el-input>
+                        </el-form-item>
+                  </el-form>
+                  <span slot="footer" class="dialog-footer">
+                        <el-button @click="addDialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="addUser">确 定</el-button>
                   </span>
             </el-dialog>
       </div>
@@ -149,7 +164,14 @@ export default {
                   // 控制编制角色的显示与隐藏
                   editdialogVisible: false,
                   //用户信息对象
-                  editFrom: {}
+                  editFrom: {},
+                  //添加用户信息对象
+                  addFrom: {
+                        roleName: "",
+                        roleDesc: ""
+                  },
+                  //控制用户添加的显示与隐藏
+                  addDialogVisible: false
             };
       },
       created() {
@@ -200,14 +222,39 @@ export default {
                   //使用这种渲染页面会使页面从新的刷新会关闭表也权限的内容
                   // this.getRolesList();
             },
-            //编辑角色
-            editRoleById(id) {
+            //展示编辑用户的对话框Dialog
+            async showEditDialog(id) {
+                  const { data: res } = await this.axios.get("roles/" + id);
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("查询用户失败");
+                  }
+                  this.editFrom = res.data;
                   this.editdialogVisible = true;
+            },
+            //编辑角色
+            async editUser() {
+                  // this.$refs.editFromRef.validate(async valid => {
+                  //       if (!valid) return;})
+                  //发起修改用户信息的数据请求
+                  const { data: res } = await this.axios.put(
+                        `roles/${this.editFrom.roleId}`,
+                        {
+                              roleName: this.editFrom.roleName,
+                              roleDesc: this.editFrom.roleDesc
+                        }
+                        // this.editFrom
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error(res.meta.msg);
+                  }
+                  this.$message.success("更新用户成功");
+                  this.getRolesList();
+                  this.editDialogVisible = false;
             },
             //删除角色
             async removeRoleById(id) {
                   //弹框提示用户是否需要需要删除
-                  await this.$confirm(
+                  const confirmResult = await this.$confirm(
                         "此操作将永久删除该角色, 是否继续?",
                         "提示",
                         {
@@ -216,18 +263,16 @@ export default {
                               type: "warning"
                         }
                   )
-                        .then(() => {
-                              this.$message({
-                                    type: "success",
-                                    message: "删除成功!"
-                              });
-                        })
-                        .catch(() => {
-                              this.$message({
-                                    type: "info",
-                                    message: "已取消删除"
-                              });
-                        });
+                        // .then(() => {
+                        //       this.$message({
+                        //             type: "success",
+                        //             message: "删除成功!"
+                        //       });
+                        // })
+                        .catch(error => error);
+                  if (confirmResult !== "confirm") {
+                        return this.$message.info("已经取消删除");
+                  }
                   const { data: res } = await this.axios.delete("roles/" + id);
                   if (res.meta.status !== 200) {
                         return this.$message.error("角色删除失败！");
@@ -260,6 +305,19 @@ export default {
             //监听分配权限对话框的关闭
             SetRightDialogClosed() {
                   this.defKeys = [];
+            },
+            //点击按钮添加用户
+            async addUser() {
+                  const { data: res } = await this.axios.post(
+                        "roles",
+                        this.addFrom
+                  );
+                  if (res.meta.status !== 201) {
+                        return this.$message.error(res.meta.msg);
+                  }
+                  this.$message.success("用户添加成功");
+                  this.getRolesList();
+                  this.addDialogVisible = false;
             }
       }
 };

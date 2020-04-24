@@ -388,7 +388,7 @@ export default {
                         const { data: res } = await this.axios.put(
                               "users/" + this.editFrom.id,
                               {
-                                    email: this.editFrom.email,
+                                    email: this.editFrom.emshowEditDialogail,
                                     mobile: this.editFrom.mobile
                               }
                         );
@@ -403,7 +403,7 @@ export default {
             // 根据id删除对应的数据
             async removeUserById(id) {
                   //弹框询问用户是否删除
-                  await this.$confirm(
+                  const confirmResult = await this.$confirm(
                         "此操作将永久删除该用户, 是否继续?",
                         "提示",
                         {
@@ -411,19 +411,20 @@ export default {
                               cancelButtonText: "取消",
                               type: "warning"
                         }
-                  )
-                        .then(() => {
-                              this.$message({
-                                    type: "success",
-                                    message: "删除成功!"
-                              });
-                        })
-                        .catch(() => {
-                              this.$message({
-                                    type: "info",
-                                    message: "已取消删除"
-                              });
-                        });
+                  ).catch(error => error);
+                  // )
+                  //       .then(() => {
+                  //             this.$message({
+                  //                   type: "success",
+                  //                   message: "删除成功!"
+                  //             });
+                  //       })
+
+                  //如果用户点击的是确定按钮 则返回值是字符串confirm
+                  //如果用户点击的是取消按钮 则返回值是字符串cancel
+                  if (confirmResult !== "confirm") {
+                        return this.$message.info("已经取消删除");
+                  }
                   const { data: res } = await this.axios.delete("users/" + id);
                   if (res.meta.status !== 200) {
                         return this.$message.error("删除用户失败！");
