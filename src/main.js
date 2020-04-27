@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import TreeTable from "vue-table-with-tree-grid"
+import TreeTable from 'vue-table-with-tree-grid'
 import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
@@ -20,7 +20,7 @@ axios.interceptors.request.use(config => {
 // Vue.prototype.$http = axios    全局注册，使用方法为:this.$http
 Vue.config.productionTip = false
 //组件名称    导入组件
-Vue.componeny('tree-table', TreeTable)
+Vue.component('tree-table', TreeTable)
 Vue.use(VueAxios, axios)
 new Vue({
   router,
