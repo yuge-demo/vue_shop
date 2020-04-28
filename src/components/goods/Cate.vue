@@ -71,9 +71,9 @@
                         label-width="100px"
                         :rules="addCateFormRules"
                   >
-                        <el-form-item label="分类名称 :" prop="cat_name">
+                        <el-form-item label="分类名称 :"  prop="cat_name">
                               <el-input v-model="addCateForm.cat_name"></el-input>
-                        </el-form-item>
+                        </el-form-item>  
                         <el-form-item label="父级名称 :">
                               <!-- option指定数据源 -->
                               <!-- props用来指定配置对象 -->
