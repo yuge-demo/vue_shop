@@ -41,8 +41,18 @@
                         </template>
                         <!-- 操作 -->
                         <template slot="opt" slot-scope="scope">
-                              <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-                              <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                              <el-button
+                                    type="primary"
+                                    icon="el-icon-edit"
+                                    size="mini"
+                                    @click="showEditDialog(scope.row.cat_id)"
+                              >编辑</el-button>
+                              <el-button
+                                    type="danger"
+                                    icon="el-icon-delete"
+                                    size="mini"
+                                    @click="removeRoleById(scope.row.cat_id)"
+                              >删除</el-button>
                         </template>
                   </tree-table>
                   <!-- 分页区域 -->
@@ -71,25 +81,36 @@
                         label-width="100px"
                         :rules="addCateFormRules"
                   >
-                        <el-form-item label="分类名称 :"  prop="cat_name">
+                        <el-form-item label="分类名称 :" prop="cat_name">
                               <el-input v-model="addCateForm.cat_name"></el-input>
-                        </el-form-item>  
+                        </el-form-item>
                         <el-form-item label="父级名称 :">
                               <!-- option指定数据源 -->
                               <!-- props用来指定配置对象 -->
                               <el-cascader
                                     v-model="selectedKeys"
                                     :options="parentCateList"
-                                    :props="{ expandTrigger: 'hover', value:'cat_id',label:'cat_name' ,children:'childr en' }"
+                                    :props="{ expandTrigger: 'hover', value:'cat_id',label:'cat_name' ,children:'children' }"
                                     @change="parentCateChanged"
                                     clearable
-                                    change-on-select
                               ></el-cascader>
                         </el-form-item>
                   </el-form>
                   <span slot="footer" class="dialog-footer">
                         <el-button @click="addCatedialogVisible = false">取 消</el-button>
                         <el-button type="primary" @click="addCate">确 定</el-button>
+                  </span>
+            </el-dialog>
+            <!-- 修改 -->
+            <el-dialog title="修改分类" :visible.sync="editdialogVisible" width="50%">
+                  <el-form ref="editFromRef" :model="editFrom" label-width="70px">
+                        <el-form-item label="分类名称">
+                              <el-input v-model="editFrom.cat_name"></el-input>
+                        </el-form-item>
+                  </el-form>
+                  <span slot="footer" class="dialog-footer">
+                        <el-button @click="editdialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="editUser">确 定</el-button>
                   </span>
             </el-dialog>
       </div>
@@ -169,7 +190,11 @@ export default {
                   //       children: "children"
                   // },
                   //选中的父级id数组
-                  selectedKeys: []
+                  selectedKeys: [],
+                  // 修改分类名称
+                  editFrom: {},
+                  // 修改用户 的显示与隐藏
+                  editdialogVisible: false
             };
       },
       created() {
@@ -255,6 +280,55 @@ export default {
                   this.selectedKeys = [];
                   this.addCateForm.cat_lever = 0;
                   this.addCateForm.cat_pid = 0;
+            },
+            //修改用户对话框
+            async showEditDialog(id) {
+                  const { data: res } = await this.axios.get(
+                        "categories/" + id
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("查询用户失败");
+                  }
+                  this.editFrom = res.data;
+                  this.editdialogVisible = true;
+            },
+            //编辑对话框提交
+            async editUser() {
+                  const { data: res } = await this.axios.put(
+                        `categories/${this.editFrom.cat_id}`,
+                        {
+                              cat_name: this.editFrom.cat_name
+                        }
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("用户更新失败");
+                  }
+                  this.$message.success("更新用户成功");
+                  this.getCartList();
+                  this.editDialogVisible = false;
+            },
+            // 删除用户
+            async removeRoleById(id) {
+                  const resultConfirm = await this.$confirm(
+                        "此操作将永久删除该文件, 是否继续?",
+                        "提示",
+                        {
+                              confirmButtonText: "确定",
+                              cancelButtonText: "取消",
+                              type: "warning"
+                        }
+                  ).catch(error => error);
+                  if (resultConfirm !== "confirm") {
+                        return this.$message.success("删除取消");
+                  }
+                  const { data: res } = await this.axios.delete(
+                        "categories/" + id
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("删除失败");
+                  }
+                  this.$message.success("删除成功");
+                  this.getCartList();
             }
       }
 };
