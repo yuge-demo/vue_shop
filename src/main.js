@@ -21,6 +21,21 @@ axios.interceptors.request.use(config => {
 Vue.config.productionTip = false
 //组件名称    导入组件
 Vue.component('tree-table', TreeTable)
+//全局过滤器  函数是哦dateFormat     通过originVal输入时间函数
+Vue.filter('dateFormat', function (originVal) {
+  const dt = new Date(originVal)
+  // padStart用于头部补全  padEnd用于尾部补全    
+  const y = dt.getFullYear()
+  const m = (dt.getMonth() + 1 + '').padStart(2, "0")
+  const d = (dt.getDate() + '').padStart(2, "0")
+
+  const hh = (dt.getHours() + '').padStart(2, "0")
+  const mm = (dt.getMinutes() + '').padStart(2, "0")
+  const ss = (dt.getSeconds() + '').padStart(2, "0")
+
+  // return `yyyy-mm-dd hh:mm:ss`
+  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`
+})
 Vue.use(VueAxios, axios)
 new Vue({
   router,
