@@ -4,6 +4,12 @@ import router from './router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import TreeTable from 'vue-table-with-tree-grid'
+//
+import VueQuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+//
 import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
@@ -21,6 +27,9 @@ axios.interceptors.request.use(config => {
 Vue.config.productionTip = false
 //组件名称    导入组件
 Vue.component('tree-table', TreeTable)
+Vue.use(VueQuillEditor)
+
+
 //全局过滤器  函数是哦dateFormat     通过originVal输入时间函数
 Vue.filter('dateFormat', function (originVal) {
   const dt = new Date(originVal)
