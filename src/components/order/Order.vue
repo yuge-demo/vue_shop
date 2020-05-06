@@ -86,16 +86,15 @@
                         <el-button type="primary" @click="addRessdialogVisible = false">确 定</el-button>
                   </span>
             </el-dialog>
-            <el-dialog
-                  title="提示"
-                  :visible.sync="dialogVisible"
-                  width="30%"
-            >
-                  <span>这是一段信息</span>
-                  <span slot="footer" class="dialog-footer">
-                        <el-button @click="dialogVisible = false">取 消</el-button>
-                        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-                  </span>
+
+            <el-dialog title="物流进度" :visible.sync="progressDialogVisible" width="50%">
+                  <el-timeline>
+                        <el-timeline-item
+                              v-for="(activity, index) in progressInfo"
+                              :key="index"
+                              :timestamp="activity.time"
+                        >{{activity.context}}</el-timeline-item>
+                  </el-timeline>
             </el-dialog>
       </div>
 </template>
@@ -136,7 +135,10 @@ export default {
                               }
                         ]
                   },
-                  City: [City]
+                  City: [City],
+                  // 物流进度对话框
+                  progressDialogVisible: false,
+                  progressInfo: []
             };
       },
       created() {
@@ -169,7 +171,16 @@ export default {
                   this.$refs.addForm.resetFields();
             },
             //查看物流进度对话框
-            showProgressBox() {}
+            async showProgressBox() {
+                  const { data: res } = await this.axios.get(
+                        "/kuaidi/1106975712662"
+                  );
+                  if (res.meta.status !== 200) {
+                        return this.$message.error("获取物流进度失败");
+                  }
+                  this.progressInfo = res.data;
+                  this.progressDialogVisible = true;
+            }
       }
 };
 </script>
