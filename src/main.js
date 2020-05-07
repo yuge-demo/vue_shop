@@ -14,13 +14,22 @@ import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
 
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
 // axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/vi/'
 axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
+// 在request中展示进度条  在response中关闭进度条 
 axios.interceptors.request.use(config => {
   //为请求头对象，添加Token验证的 Authorization 字段
+  NProgress.start();
   config.headers.Authorization = window.sessionStorage.getItem('token')
   //标准格式
   return config;
+})
+axios.interceptors.response.use(config => {
+  NProgress.done();
+  return config
 })
 
 // Vue.prototype.$http = axios    全局注册，使用方法为:this.$http
