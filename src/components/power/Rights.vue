@@ -5,7 +5,7 @@
                   <el-breadcrumb-item>权限管理</el-breadcrumb-item>
                   <el-breadcrumb-item>权限列表</el-breadcrumb-item>
             </el-breadcrumb>
-            <el-cart>
+            <el-card>
                   <el-table :data="rightsList" border stripe>
                         <el-table-column type="index"></el-table-column>
                         <el-table-column prop="authName" label="权限名称"></el-table-column>
@@ -18,7 +18,7 @@
                               </template>
                         </el-table-column>
                   </el-table>
-            </el-cart>
+            </el-card>
       </div>
 </template>
 
